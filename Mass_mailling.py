@@ -19,11 +19,6 @@ parser = argparse.ArgumentParser(description="Ce soft permet d'envoyer des mails
 
 # Définition des arguments sans répétition des valeurs
 parser.add_argument('-c', '--csv', help="fichier csv avec l'ensemble des informations nécessaires",metavar='', required=True)
-#parser.add_argument('-id', '--identifiant', help="identifiant unique de l'application",metavar='', required=True)
-#parser.add_argument('-a', '--appname', help="nom de l'application",metavar='', required=True)
-#parser.add_argument('-ao', '--appofficier', help="prénom de l'application officier",metavar='', required=True)
-#parser.add_argument('-m', '--mail', help="mail de l'application officier",metavar='', required=True)
-
 
 
 # Récupération des arguments fournis
