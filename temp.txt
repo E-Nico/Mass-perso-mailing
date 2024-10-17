@@ -1,0 +1,7 @@
+Bonjour $application officier$
+
+Merci de mettre à jour l'application : 
+ID : $ID$
+NAME : $app name$
+
+Cordialement,
