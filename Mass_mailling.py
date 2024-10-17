@@ -14,11 +14,16 @@ import pandas as pd
 
 from email.message import EmailMessage
 import smtplib, ssl
-import outlook
-mail = outlook.Outlook()
+import win32com.client as win32
+from colorama import Style, Fore, init
+
 #Features to add :
 # - L'ajout du mode "confirmation"
 # - Une description plus exhaustive de ce que fait l'application et comment l'utiliser
+
+
+#Init est utilisé pour l'ajout de coleur dans le code
+init()
 
 # Création d'un parser avec une description plus détaillée
 parser = argparse.ArgumentParser(description="Ce soft permet d'envoyer des mails personnalisés en masse. Pensez à bien formater votre CSV afin de ne pas avoir de problème.\nLe nom des colonnes du CSV doit être identiques aux variables dans le mail")
@@ -27,7 +32,7 @@ parser = argparse.ArgumentParser(description="Ce soft permet d'envoyer des mails
 # Définition des arguments sans répétition des valeurs
 parser.add_argument('-c', '--csv', help="fichier csv avec l'ensemble des informations nécessaires",metavar='', required=True)
 parser.add_argument('-t', '--template', help="template de mail au format texte avec les variables",metavar='', required=True)
-parser.add_argument('-m', '--mode', help="deux modes sont disponibles, confirmé [0] ou non confirmé [1]. Dans le mode confirmé, chaque mail devra être validé dans le prompt avant envoie. Dans le mode non confirmé, les mails sont envoyés sans confirmation",metavar='', required=False)
+parser.add_argument('-m', '--mode', help="deux modes sont disponibles, non-confirmé [0] ou confirmé [1]. Dans le mode confirmé, chaque mail devra être validé dans le prompt avant envoie. Dans le mode non confirmé, les mails sont envoyés sans confirmation",metavar='', required=False)
 
 
 
@@ -51,10 +56,8 @@ def get_mail_template():
     fichier.close()
     return tempmail
 
+"""
 def create_perso_template(header, dictionnaire_data, tempmail):
-    dict_var_header = []
-    for value in header:
-        dict_var_header.append(f'${value}$')
     print(dictionnaire_data[header[0]])  
     for i in range(0,len(dictionnaire_data[header[0]])):
         print(i)
@@ -75,8 +78,16 @@ def create_perso_template(header, dictionnaire_data, tempmail):
             
         print(mail)
         print("--------------------------------------------------------------------------")
+"""
+
+def create_perso_template(header, dictionnaire_data, mail):
+    mail = mail.replace(f'${header[y]}$',str(dictionnaire_data[header[y]][i]))
+    return mail
 
 def send_mail(template):
+    print(f"{Fore.GREEN}[+] Mail envoye !{Fore.RESET}")
+
+def send_mail3(template):
     sender = "nlefevre650@headmind.com"
     recipient = "nlefevre650@headmind.com"
     message = "Hello world!"
@@ -93,13 +104,37 @@ def send_mail(template):
     smtp.sendmail(sender, recipient, email.as_string())
     smtp.quit()
 
+def send_mail2(template):
+    outlook = win32.Dispatch('outlook.application')
+    mail = outlook.CreateItem(0)
+    mail.To = 'nlefevre650@headmind.coms'
+    mail.Subject = 'Message subject'
+    mail.Body = 'Message body'
+
+    mail.Send()
+
 
 if __name__ == "__main__" :
-    #header = get_header_csv()
-    #dictionnaire_data = get_dictionnaire_csv()
-    #print(dictionnaire_data)
-    #tempmail = get_mail_template()
-    #create_perso_template(header, dictionnaire_data, tempmail)
-    temp = "Bonjour $application officier$ Merci de mettre à jour l'application : ID : $ID$ NAME : $app name$ Cordialement,"
-    send_mail(temp)
+    header = get_header_csv()
+    dictionnaire_data = get_dictionnaire_csv()
+    tempmail = get_mail_template()
+ 
+    for i in range(0,len(dictionnaire_data[header[0]])):
+        mail = tempmail
+
+        for y in range (0,len(dictionnaire_data)):
+            if f'${header[y]}$' in tempmail:
+                mail = create_perso_template(header, dictionnaire_data, mail)
+            else:
+                print(f"{Fore.RED}[-] ${header[y]}$ nest pas dans le template{Fore.RESET}")
+
+        print(f"{Fore.GREEN}[+] TEMPLATE:{Fore.RESET}\n{Fore.YELLOW}{mail}{Fore.RESET}")
+        send_mail(mail)
+        print("(----------------------------------)")
+
+
+    create_perso_template(header, dictionnaire_data, tempmail)
+    #temp = "Bonjour $application officier$ Merci de mettre à jour l'application : ID : $ID$ NAME : $app name$ Cordialement,"
+    #send_mail2(temp)
+
 
